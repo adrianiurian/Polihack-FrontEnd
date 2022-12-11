@@ -52,13 +52,18 @@ const StyledCover = styled('img')({
 // ----------------------------------------------------------------------
 
 BlogPostCard.propTypes = {
-  post: PropTypes.object.isRequired,
+  cover: PropTypes.string,
+  title: PropTypes.string,
+  view: PropTypes.number,
+  share: PropTypes.number,
+  comment: PropTypes.number,
+  author: PropTypes.string,
+  createdAt: PropTypes.string,
   index: PropTypes.number,
 };
 
-export default function BlogPostCard({ post, index }) {
-  const { cover, title, view, comment, share, author, createdAt } = post;
-  const latestPostLarge = index === 0;
+export default function BlogPostCard({ cover, title, view, comment, share, author, createdAt, index, url }) {
+  const latestPostLarge = index === 0 || index === 8 || index === 7 || index === 14 || index === 20;
   const latestPost = index === 1 || index === 2;
 
   const POST_INFO = [
@@ -69,7 +74,7 @@ export default function BlogPostCard({ post, index }) {
 
   return (
     <Grid item xs={12} sm={latestPostLarge ? 12 : 6} md={latestPostLarge ? 6 : 3}>
-      <Card sx={{ position: 'relative' }}>
+      <Card sx={{ position: 'relative', cursor: 'pointer' }} onClick={()=> window.open(url)}>
         <StyledCardMedia
           sx={{
             ...((latestPostLarge || latestPost) && {
@@ -104,8 +109,8 @@ export default function BlogPostCard({ post, index }) {
               ...((latestPostLarge || latestPost) && { display: 'none' }),
             }}
           />
-          <StyledAvatar
-            alt={author.name}
+          {/* <StyledAvatar
+            alt={author}
             src={author.avatarUrl}
             sx={{
               ...((latestPostLarge || latestPost) && {
@@ -116,7 +121,7 @@ export default function BlogPostCard({ post, index }) {
                 height: 40,
               }),
             }}
-          />
+          /> */}
 
           <StyledCover alt={title} src={cover} />
         </StyledCardMedia>

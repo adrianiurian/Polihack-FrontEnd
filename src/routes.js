@@ -9,6 +9,9 @@ import LoginPage from './pages/LoginPage';
 import Page404 from './pages/Page404';
 import ProductsPage from './pages/ProductsPage';
 import DashboardAppPage from './pages/DashboardAppPage';
+import SOSPage from './pages/SOSPage';
+import SignupPage from './pages/SignupPage';
+import MapPage from './pages/MapPage';
 
 // ----------------------------------------------------------------------
 
@@ -19,7 +22,7 @@ export default function Router() {
       element: <DashboardLayout />,
       children: [
         { element: <Navigate to="/dashboard/app" />, index: true },
-        { path: 'app', element: <DashboardAppPage /> },
+        { path: 'app', element: <MapPage /> },
         { path: 'user', element: <UserPage /> },
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
@@ -28,6 +31,14 @@ export default function Router() {
     {
       path: 'login',
       element: <LoginPage />,
+    },
+    {
+      path: 'signup',
+      element: <SignupPage />,
+    },
+    {
+      path: 'sos',
+      element: <SOSPage />,
     },
     {
       element: <SimpleLayout />,

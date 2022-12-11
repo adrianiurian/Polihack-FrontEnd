@@ -1,7 +1,9 @@
 import { Helmet } from 'react-helmet-async';
-import { filter } from 'lodash';
+import { filter, sample } from 'lodash';
 import { sentenceCase } from 'change-case';
-import { useState } from 'react';
+import axios from 'axios';
+import { faker } from '@faker-js/faker';
+import { useEffect, useState } from 'react';
 // @mui
 import {
   Card,
@@ -28,17 +30,15 @@ import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
 // sections
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
-// mock
-import USERLIST from '../_mock/user';
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Name', alignRight: false },
-  { id: 'company', label: 'Company', alignRight: false },
+  { id: 'location', label: 'Location', alignRight: false },
   { id: 'role', label: 'Role', alignRight: false },
-  { id: 'isVerified', label: 'Verified', alignRight: false },
-  { id: 'status', label: 'Status', alignRight: false },
+  { id: 'description', label: 'Description', alignRight: false },
+  { id: 'salary', label: 'Minimum Salary (RON)', alignRight: true },
   { id: '' },
 ];
 
@@ -87,6 +87,35 @@ export default function UserPage() {
   const [filterName, setFilterName] = useState('');
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const [jobsData, setJobsData] = useState();
+
+  const getJobsData = async () =>{
+    const response = await axios.get('http://127.0.0.1:5000/all_jobs');
+    setJobsData(response.data);
+    console.log(response.data);
+    return response.data;
+  }
+
+  useEffect(()=> {
+    async function fetchData() {
+      const DataArray = await getJobsData();
+      setJobsData(DataArray);
+    };
+    fetchData();
+  }, []);
+
+  if (!jobsData) 
+    return (<Container/>);
+
+  const USERLIST = [...Array(jobsData.length)].map((_, index) => ({
+    id: faker.datatype.uuid(),
+    name: jobsData[index].username,
+    location: jobsData[index].city,
+    salary: jobsData[index].min_salary,
+    role: jobsData[index].title,
+    description: jobsData[index].description,
+  })); 
 
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
@@ -142,10 +171,15 @@ export default function UserPage() {
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - USERLIST.length) : 0;
 
-  const filteredUsers = applySortFilter(USERLIST, getComparator(order, orderBy), filterName);
+  const filteredUsers = USERLIST;
+  if (USERLIST !== undefined) {
+    console.log(USERLIST);
+  }
 
   const isNotFound = !filteredUsers.length && !!filterName;
 
+  if (USERLIST !== undefined) {
+    console.log(USERLIST.length);
   return (
     <>
       <Helmet>
@@ -157,9 +191,9 @@ export default function UserPage() {
           <Typography variant="h4" gutterBottom>
             Jobs
           </Typography>
-          <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
+          {/* <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
             New User
-          </Button>
+          </Button> */}
         </Stack>
 
         <Card>
@@ -179,36 +213,34 @@ export default function UserPage() {
                 />
                 <TableBody>
                   {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    const { id, name, role, status, company, avatarUrl, isVerified } = row;
+                    const { id, name, location, role, description, salary } = row;
                     const selectedUser = selected.indexOf(name) !== -1;
 
                     return (
                       <TableRow hover key={id} tabIndex={-1} role="checkbox" selected={selectedUser}>
                         <TableCell padding="checkbox">
-                          <Checkbox checked={selectedUser} onChange={(event) => handleClick(event, name)} />
+                          {/* <Checkbox checked={selectedUser} onChange={(event) => handleClick(event, name)} /> */}
                         </TableCell>
 
                         <TableCell component="th" scope="row" padding="none">
                           <Stack direction="row" alignItems="center" spacing={2}>
-                            <Avatar alt={name} src={avatarUrl} />
+                            {/* <Avatar alt={name} src={avatarUrl} /> */}
                             <Typography variant="subtitle2" noWrap>
                               {name}
                             </Typography>
                           </Stack>
                         </TableCell>
 
-                        <TableCell align="left">{company}</TableCell>
+                        <TableCell align="left" sx={{paddingLeft: 0}}>{location}</TableCell>
 
-                        <TableCell align="left">{role}</TableCell>
+                        <TableCell align="left"sx={{paddingLeft: 0}}>{role}</TableCell>
 
-                        <TableCell align="left">{isVerified ? 'Yes' : 'No'}</TableCell>
+                        <TableCell align="left"sx={{paddingLeft: 0}}>{description}</TableCell>
 
-                        <TableCell align="left">
-                          <Label color={(status === 'banned' && 'error') || 'success'}>{sentenceCase(status)}</Label>
-                        </TableCell>
+                        <TableCell align="right"sx={{paddingLeft: 0}}>{salary}</TableCell>
 
                         <TableCell align="right">
-                          <IconButton size="large" color="inherit" onClick={handleOpenMenu}>
+                          <IconButton size="large" color="inherit">
                             <Iconify icon={'eva:more-vertical-fill'} />
                           </IconButton>
                         </TableCell>
@@ -291,4 +323,5 @@ export default function UserPage() {
       </Popover>
     </>
   );
+      }
 }
